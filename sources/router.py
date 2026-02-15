@@ -12,6 +12,9 @@ from sources.agents.code_agent import CoderAgent
 from sources.agents.casual_agent import CasualAgent
 from sources.agents.file_agent import FileAgent
 from sources.agents.browser_agent import BrowserAgent
+from sources.agents.research_agent import ResearchAgent
+from sources.agents.data_agent import DataAgent
+from sources.agents.design_agent import DesignAgent
 from sources.language import LanguageUtility
 from sources.utility import pretty_print, animate_thinking, timer_decorator
 from sources.logger import Logger
@@ -396,6 +399,45 @@ class AgentRouter:
             ("temukan file bernama data.csv", "files"),
             ("cari file laporan.pdf di drive", "files"),
             ("buat folder baru bernama proyek", "files"),
+            ("analisis data penjualan", "data"),
+            ("buat grafik dari data CSV", "data"),
+            ("analisis file data.csv", "data"),
+            ("buat chart perbandingan", "data"),
+            ("hitung statistik dari dataset", "data"),
+            ("buat dashboard data", "data"),
+            ("olah data excel", "data"),
+            ("buat visualisasi data", "data"),
+            ("analisis tren penjualan bulanan", "data"),
+            ("buat pie chart dari data", "data"),
+            ("analyze this CSV file", "data"),
+            ("create a chart from the data", "data"),
+            ("build a data dashboard", "data"),
+            ("calculate statistics", "data"),
+            ("make a bar chart", "data"),
+            ("desain landing page modern", "design"),
+            ("buat UI yang bagus", "design"),
+            ("desain halaman login", "design"),
+            ("buat tampilan website yang menarik", "design"),
+            ("redesign halaman utama", "design"),
+            ("buat design form registrasi", "design"),
+            ("buat mockup website", "design"),
+            ("desain dashboard admin yang modern", "design"),
+            ("design a beautiful homepage", "design"),
+            ("create a modern UI design", "design"),
+            ("make a beautiful landing page", "design"),
+            ("design a login page with glassmorphism", "design"),
+            ("buat desain kartu produk", "design"),
+            ("desain navigation bar yang responsif", "design"),
+            ("riset mendalam tentang AI terbaru", "research"),
+            ("lakukan research tentang kompetitor", "research"),
+            ("riset pasar untuk produk baru", "research"),
+            ("kumpulkan data dari internet tentang startup", "research"),
+            ("deep research about machine learning trends", "research"),
+            ("research competitors in the market", "research"),
+            ("do market research for SaaS products", "research"),
+            ("riset dan analisis teknologi blockchain", "research"),
+            ("kumpulkan informasi lengkap tentang perusahaan", "research"),
+            ("lakukan analisis komprehensif tentang industri", "research"),
         ]
         random.shuffle(few_shots)
         texts = [text for text, _ in few_shots]
@@ -431,6 +473,9 @@ class AgentRouter:
             "web": "browser_agent",
             "files": "file_agent",
             "mcp": "mcp_agent",
+            "research": "research_agent",
+            "data": "data_agent",
+            "design": "design_agent",
         }
         target_type = agent_type_map.get(task_type)
         if target_type:
@@ -490,6 +535,48 @@ class AgentRouter:
         is_web_task = any(kw in text_lower for kw in web_search_keywords) or is_web_search_by_keyword
 
         is_code_task = (has_action and has_target) or has_phrase
+
+        design_keywords = {'desain', 'design', 'redesign', 'mockup', 'wireframe',
+                          'ui', 'ux', 'tampilan', 'layout', 'glassmorphism', 'neumorphism'}
+        design_phrases = ['buat ui', 'buat tampilan', 'desain halaman', 'design page',
+                         'buat design', 'modern design', 'beautiful page', 'desain website']
+        is_design_task = bool(words & design_keywords) or any(kw in text_lower for kw in design_phrases)
+
+        data_keywords = {'analisis', 'analyze', 'analysis', 'statistik', 'statistics',
+                        'chart', 'grafik', 'graph', 'dashboard', 'visualisasi', 'visualization',
+                        'dataset', 'csv', 'excel', 'pivot'}
+        data_phrases = ['analisis data', 'buat chart', 'buat grafik', 'data analysis',
+                       'olah data', 'hitung statistik', 'buat dashboard data']
+        is_data_task = bool(words & data_keywords) or any(kw in text_lower for kw in data_phrases)
+
+        research_keywords = {'riset', 'research', 'investigasi', 'investigation'}
+        research_phrases = ['riset mendalam', 'deep research', 'riset pasar', 'market research',
+                           'analisis kompetitor', 'competitor analysis', 'literature review',
+                           'kumpulkan data dari internet', 'lakukan riset']
+        is_research_task = any(kw in text_lower for kw in research_phrases) or (
+            bool(words & research_keywords) and len(text_lower.split()) > 4
+        )
+
+        if is_research_task:
+            agent = self.find_agent_for_task("research")
+            if agent:
+                pretty_print(f"Tugas riset terdeteksi -> {agent.agent_name}", color="info")
+                self.logger.info(f"Research task detected, routing to {agent.agent_name}")
+                return agent
+
+        if is_data_task:
+            agent = self.find_agent_for_task("data")
+            if agent:
+                pretty_print(f"Tugas data terdeteksi -> {agent.agent_name}", color="info")
+                self.logger.info(f"Data task detected, routing to {agent.agent_name}")
+                return agent
+
+        if is_design_task and not is_code_task:
+            agent = self.find_agent_for_task("design")
+            if agent:
+                pretty_print(f"Tugas design terdeteksi -> {agent.agent_name}", color="info")
+                self.logger.info(f"Design task detected, routing to {agent.agent_name}")
+                return agent
 
         if is_web_task:
             agent = self.find_agent_for_task("web")

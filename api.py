@@ -20,7 +20,7 @@ import uuid
 
 from sources.llm_provider import Provider
 from sources.interaction import Interaction
-from sources.agents import CasualAgent, CoderAgent, FileAgent, PlannerAgent, BrowserAgent
+from sources.agents import CasualAgent, CoderAgent, FileAgent, PlannerAgent, BrowserAgent, ResearchAgent, DataAgent, DesignAgent
 from sources.browser import Browser, create_driver
 from sources.utility import pretty_print
 from sources.logger import Logger
@@ -125,6 +125,21 @@ def initialize_system():
             name="Browser",
             prompt_path=f"prompts/{personality_folder}/browser_agent.txt",
             provider=provider, verbose=False, browser=browser
+        ),
+        ResearchAgent(
+            name="Research",
+            prompt_path=f"prompts/{personality_folder}/research_agent.txt",
+            provider=provider, verbose=False, browser=browser
+        ),
+        DataAgent(
+            name="Data Analyst",
+            prompt_path=f"prompts/{personality_folder}/data_agent.txt",
+            provider=provider, verbose=False
+        ),
+        DesignAgent(
+            name="Designer",
+            prompt_path=f"prompts/{personality_folder}/design_agent.txt",
+            provider=provider, verbose=False
         ),
         PlannerAgent(
             name="Planner",
