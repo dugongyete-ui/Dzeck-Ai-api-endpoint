@@ -52,5 +52,11 @@
     "content": "User meminta: Buatkan website game ular tangga ",
     "source": "conversation",
     "timestamp": "2026-02-14T20:37:35.250881"
+  },
+  {
+    "category": "request",
+    "content": "User meminta: Buatkan Website drama China full stack autonomous siap produksi ",
+    "source": "conversation",
+    "timestamp": "2026-02-15T09:03:00.550895"
   }
 ]
